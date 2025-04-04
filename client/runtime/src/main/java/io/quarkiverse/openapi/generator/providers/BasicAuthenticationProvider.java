@@ -37,14 +37,13 @@ public class BasicAuthenticationProvider extends AbstractAuthProvider {
 
     @Override
     public void filter(ClientRequestContext requestContext) throws IOException {
-        String basicToken;
+        String basicToken = AuthUtils.basicAuthAccessTokenWithoutPrefix(getUsername(), getPassword());
+
         if (isTokenPropagation()) {
             LOGGER.warn("Token propagation enabled for BasicAuthentication");
-            basicToken = getTokenForPropagation(requestContext.getHeaders());
-            basicToken = sanitizeBasicToken(basicToken);
-        } else {
-            basicToken = AuthUtils.basicAuthAccessTokenWithoutPrefix(getUsername(), getPassword());
+            basicToken = sanitizeBasicToken(getTokenForPropagation(requestContext.getHeaders()));
         }
+
         if (!basicToken.isBlank()) {
             requestContext.getHeaders().add(HttpHeaders.AUTHORIZATION,
                     AuthUtils.basicAuthAccessToken(basicToken));
